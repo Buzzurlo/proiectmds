@@ -1,15 +1,13 @@
 package com.example.bobo.fmichat;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.View.OnClickListener;
+import android.widget.Toast;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 
 /**
  * Created by H4ck1nt0sh on 08/06/2017.
@@ -17,38 +15,45 @@ import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private Button go;
+    private Button go;                // Butonul De Trimitere
+    private EditText add_user;       // Initializare Zona Text User
+    private EditText add_pass;      // Initializare Zona Text Password
+
+
     private String username;
     private String password;
-    private ListView listView;
 
-    @SuppressLint("MissingSuperCall")       // <-- Supress-ul trebuie scos cand se va pune in AndroidManifest.xml
-                                           // LoginActivity ca LAUNCHER
     @Override
     protected void onCreate(Bundle savedInstanceState) {         //Zona incarcata la accesarea aplicatiei
 
-        validate_user_pass();
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
-        listView = (ListView) findViewById(R.id.ListView);
+        add_user = (EditText) findViewById(R.id.email);
+        add_pass = (EditText) findViewById(R.id.password);
+        go = (Button) findViewById(R.id.email_sign_in_button);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        go.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
 
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.putExtra("username", username);
-                intent.putExtra("password", password);
-                startActivity(intent);
+                username = add_user.getText().toString();              //Input Username
+                password = add_pass.getText().toString();             //Input Password
+
+                if (username.equals("") && password.equals("")) {   //Form-ul NU trebuie sa fie gol
+                    Toast.makeText(getApplicationContext(),
+                            "Please complete the sign up form . . .",
+                            Toast.LENGTH_LONG).show();
+
+                } else {
+
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("name", username);
+                    intent.putExtra("password", password);
+                    startActivity(intent);                  //Trimite datele catre MainActivity
+
+                }
+
             }
         });
-    }
-
-    private void validate_user_pass() {                    //Trimite Username + Password
-
-        final EditText email_text =  (EditText) findViewById(R.id.email);
-        final EditText pass_text = (EditText) findViewById(R.id.password);
-        username = email_text.getText().toString();
-        password = pass_text.getText().toString();
-
     }
 }

@@ -1,9 +1,7 @@
 package com.example.bobo.fmichat;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -48,11 +46,10 @@ public class MainActivity extends AppCompatActivity {
         room_name = (EditText) findViewById(R.id.room_name_edittext);
         listView = (ListView) findViewById(R.id.ListView);
 
+        name = getIntent().getExtras().get("name").toString();       //Preia username din clasa LoginActivity
 
-
-        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,list_of_rooms);
+        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list_of_rooms);
         listView.setAdapter(arrayAdapter);
-        request_user_name();
 
         add_room.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
@@ -91,33 +88,10 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(getApplicationContext(),Chat_room.class);
-                intent.putExtra("room_name",((TextView)view).getText().toString());
-                intent.putExtra("user_name",name);
+                intent.putExtra("room_name", ((TextView)view).getText().toString());
+                intent.putExtra("user_name", name);
                 startActivity(intent);
             }
         });
     }
-
-    private void request_user_name(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Logheaza-te cu mailul facultatii");
-
-
-        final EditText input_field = new EditText(this);
-
-        builder.setView(input_field);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialogInterface, int i){
-                name = input_field.getText().toString();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialogInterface, int i){
-                dialogInterface.cancel();
-                request_user_name();
-            }
-        });
-        builder.show();
-    }
-
 }
