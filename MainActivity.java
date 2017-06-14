@@ -1,122 +1,84 @@
-package com.example.bobo.fmichat;
+package com.example.meeno.appprova;
 
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.BaseAdapter;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import java.util.Random;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-
-public class MainActivity extends AppCompatActivity {
-
-    private Button add_room;
-    private EditText room_name;
-
-    private ListView listView;
-    private ArrayAdapter<String> arrayAdapter;
-    private ArrayList<String> list_of_rooms = new ArrayList<>();
-    private String name;
-    private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
-
+public class MainActivity extends Activity {
+    private ListView roomList;
+    private HorizontalScrollView roomHistory;
+    private LinearLayout tabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        add_room = (Button) findViewById(R.id.btn_add_room);
-        room_name = (EditText) findViewById(R.id.room_name_edittext);
-        listView = (ListView) findViewById(R.id.ListView);
+        tabs = (LinearLayout) findViewById(R.id.tabs);
+        roomList = (ListView) findViewById(R.id.roomList);
 
-
-
-        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list_of_rooms);
-        listView.setAdapter(arrayAdapter);
-        request_user_name();
-
-        add_room.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
-
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put(room_name.getText().toString(),"");
-                root.updateChildren(map);
-            }
-        });
-
-        root.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                Set<String> set = new HashSet<String>();
-                Iterator i = dataSnapshot.getChildren().iterator();
-
-                while(i.hasNext()){
-                    set.add(((DataSnapshot)i.next()).getKey());
-                }
-
-                list_of_rooms.clear();
-                list_of_rooms.addAll(set);
-
-                arrayAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        MyAdapter adapter = new MyAdapter();
+        roomList.setAdapter(adapter);
+        roomList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Erase old view
+                //tabs.removeViewAt(tabs.getChildCount() - 1);
 
-                Intent intent = new Intent(getApplicationContext(),Chat_room.class);
-                intent.putExtra("room_name", ((TextView)view).getText().toString());
-                intent.putExtra("user_name", name);
-                startActivity(intent);
+                // Add view
+                String name = ((TextView) view.findViewById(R.id.roomName)).getText().toString();
+                TextView temp = (TextView) View.inflate(MainActivity.this, R.layout.tab_item, null);
+                temp.setText(" > " + name);
+                tabs.addView(temp);
             }
         });
     }
 
-    private void request_user_name(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Logheaza-te cu mailul facultatii");
+    private class MyAdapter extends BaseAdapter {
+        private String[] strings = {"room1", "room2", "room3", "room4"};
+        private Random rand;
 
+        public MyAdapter() {
+            rand = new Random();
+        }
 
-        final EditText input_field = new EditText(this);
+        @Override
+        public int getCount() {
+            return strings.length;
+        }
 
-        builder.setView(input_field);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialogInterface, int i){
-                name = input_field.getText().toString();
+        @Override
+        public String getItem(int position) {
+            return strings[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return strings[position].hashCode();
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if(convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.list_item, parent, false);
             }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialogInterface, int i){
-                dialogInterface.cancel();
-                request_user_name();
-            }
-        });
-        builder.show();
+            ((TextView) convertView.findViewById(R.id.roomName)).setText(strings[position]);
+            ((TextView) convertView.findViewById(R.id.numUsers)).setText("Users: " + String.valueOf(rand.nextInt(200)));
+            ((TextView) convertView.findViewById(R.id.numRooms)).setText("Rooms: " + String.valueOf(rand.nextInt(10)));
+            return convertView;
+        }
     }
 }
